@@ -1,23 +1,12 @@
-import Link from 'next/link';
+import { alreadyLoggedIn } from "@/util/sessionUtil";
+import Link from "next/link";
 
-export default function Home() {
-  const loginItems = [
-		{
-			id: "1",
-			site: "gmail",
-		},
-		{
-			id: "2",
-			site: "facebook",
-		},
-	];
-  return (
-    <ul>
-      {loginItems.map((item) => (
-        <li key={item.id}>
-          <Link href={`/item/${item.id}`}>{item.site}</Link>
-        </li>
-      ))}
-    </ul>
-  );
+export default async function Home() {
+	await alreadyLoggedIn();
+
+	return (
+		<>
+			<Link href="/account/login">Sign In</Link>
+		</>
+	);
 }
