@@ -2,15 +2,15 @@ import Link from 'next/link';
 
 export default function Home() {
   const loginItems = [
-    {
-      id: 1,
-      site: 'gmail'
-    },
-    {
-      id: 2,
-      site: 'facebook'
-    },
-  ];
+		{
+			id: "1",
+			site: "gmail",
+		},
+		{
+			id: "2",
+			site: "facebook",
+		},
+	];
   return (
     <ul>
       {loginItems.map((item) => (
