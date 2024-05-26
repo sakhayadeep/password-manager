@@ -5,7 +5,10 @@ import { LoginObject } from "@/util/mongodb/loginObject.type";
 
 export default async function Item({
 	searchParams,
-}: Readonly<{ [key: string]: any }>) {
+}: Readonly<{
+	params?: any;
+	searchParams?: any;
+}>) {
 	const user = await loginIsRequired();
 	const { website, username } = searchParams;
 	const loginObjectId = `${user.email}${website}${username}`;
