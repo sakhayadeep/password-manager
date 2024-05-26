@@ -1,29 +1,17 @@
 import Link from "next/link";
 import { SignOut } from "@/components/auth/signout-button";
+import { LoginItems } from "@/components/dashboard";
+import { getAllLoginObjects } from "@/util/mongodb/connect";
+import { loginIsRequired } from "@/util/sessionUtil";
 
 export default async function Home() {
-	const loginItems = [
-		{
-			id: "1",
-			site: "gmail",
-		},
-		{
-			id: "2",
-			site: "facebook",
-		},
-	];
+	const user = await loginIsRequired();
+	const items = await getAllLoginObjects(user.email as string);
 	return (
 		<>
-			<ul>
-				{loginItems.map((item) => (
-					<li key={item.id}>
-						<Link href={`/item/${item.id}`}>{item.site}</Link>
-					</li>
-				))}
-			</ul>
-			<div>
-				<SignOut />
-			</div>
+			<Link href="/create-item">Add new login</Link>
+			<SignOut />
+			<LoginItems items={items} />
 		</>
 	);
 }

@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
     const session = await auth();
     if (!session?.user) {
-        return NextResponse.redirect(new URL('/account/login', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
     }
 }
 

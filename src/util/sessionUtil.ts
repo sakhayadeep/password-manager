@@ -4,7 +4,9 @@ import { auth } from "@/auth";
 export async function loginIsRequired() {
     const session = await auth();
 
-	if (!session?.user) redirect("/account/login");
+    if (!session?.user) { redirect("/"); }
+
+    return session.user;
 }
 
 export async function alreadyLoggedIn() {

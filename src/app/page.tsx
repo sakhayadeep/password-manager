@@ -1,12 +1,8 @@
+import { SignIn } from "@/components/auth/signin-button";
 import { alreadyLoggedIn } from "@/util/sessionUtil";
-import Link from "next/link";
 
-export default async function Home() {
+export default async function Login() {
 	await alreadyLoggedIn();
 
-	return (
-		<>
-			<Link href="/account/login">Sign In</Link>
-		</>
-	);
+	return <SignIn />;
 }
