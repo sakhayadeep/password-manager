@@ -3,12 +3,15 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { handleFormSubmit } from "@/util/createItem/createItemUtil";
+import { Loading } from "@/components/ui-elements/icons";
+import { useFormStatus } from "react-dom";
 
 export default function CreateItem() {
 	const websiteRef = useRef<HTMLInputElement>(null);
 	const usernameRef = useRef<HTMLInputElement>(null);
 	const passwordRef = useRef<HTMLInputElement>(null);
 	const noteRef = useRef<HTMLTextAreaElement>(null);
+	const { pending } = useFormStatus();
 
 	const handleFormSubmitWrapper = async () => {
 		const formData = {
@@ -17,7 +20,10 @@ export default function CreateItem() {
 			password: passwordRef?.current?.value,
 			note: noteRef?.current?.value,
 		};
-		await handleFormSubmit(formData);
+		const result = await handleFormSubmit(formData);
+		if (!result?.success) {
+			console.log("submit failed");
+		}
 	};
 
 	return (
@@ -116,7 +122,7 @@ export default function CreateItem() {
 							type="submit"
 							className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
 						>
-							Create
+							{pending ? <Loading /> : "Create"}
 						</button>
 					</div>
 				</form>

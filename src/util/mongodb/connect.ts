@@ -2,64 +2,88 @@
 
 import { LoginItemsInterface } from '@/app/dashboard/dashboard.type';
 import { LoginObject } from './loginObject.type';
-
 const { MongoClient, ServerApiVersion } = require('mongodb');
+import { getEncryptedData, getDecryptedData, getHashedData } from './encryption';
+
 const uri = process.env.MONGO_CONNECTION_STRING;
 const dbName = process.env.MONGO_DB;
 const collectionName = process.env.MONGO_COLLECTION;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+
+let client: typeof MongoClient;
+let clientPromise: Promise<typeof MongoClient>;
+
+if (!client) {
+    client = new MongoClient(uri, {
+        serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+        }
+    });
+    clientPromise = client.connect();
+}
 
 export async function createLoginObject(loginObject: LoginObject) {
     try {
-        await client.connect();
-
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
 
         const { appUserEmail, website, username } = loginObject;
+        const { iv: passwordIv, encryptedData: password } = getEncryptedData(loginObject.password);
+        const { iv: noteIv, encryptedData: note } = getEncryptedData(loginObject.note);
+        const documentId = getHashedData(`${appUserEmail}${website}${username}`);
         const loginItem = {
-            _id: `${appUserEmail}${website}${username}`,
-            ...loginObject
+            _id: documentId,
+            ...loginObject,
+            passwordIv,
+            password,
+            noteIv,
+            note,
         };
 
         const result = await collection.insertOne(loginItem);
         console.log(`A document was inserted with the _id: ${result.insertedId}`);
+        return { success: result?.acknowledged };
     } catch (err) {
         console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
-    } finally {
-        await client.close();
+        return { success: false };
     }
 }
 
 export async function getLoginObject(loginObjectId: string): Promise<LoginObject | null> {
-    let loginItem;
     try {
-        await client.connect();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
-        loginItem = await collection.findOne(
-            { _id: loginObjectId },
+        const documentId = getHashedData(loginObjectId);
+        const loginItem = await collection.findOne(
+            { _id: documentId },
         );
+        const password = getDecryptedData({
+            data: loginItem.password,
+            iv: loginItem.passwordIv
+        });
+        const note = getDecryptedData({
+            data: loginItem.note,
+            iv: loginItem.noteIv
+        });
+        const decryptedLoginItem = {
+            ...loginItem,
+            password,
+            note,
+        };
+        delete decryptedLoginItem.passwordIv;
+        delete decryptedLoginItem.noteIv;
+        return decryptedLoginItem;
     } catch (err) {
         console.error(`Something went wrong trying to get the document: ${err}\n`);
-    } finally {
-        await client.close();
+        return null;
     }
-    return loginItem;
 }
 
 export async function getAllLoginObjects(appUserEmail: string): Promise<LoginItemsInterface[]> {
-    let result;
     try {
-        await client.connect();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
         const query = { appUserEmail };
@@ -70,13 +94,13 @@ export async function getAllLoginObjects(appUserEmail: string): Promise<LoginIte
                 projection: { _id: 0, website: 1, username: 1 },
             }
         );
-        result = await cursor.toArray();
+        const allLoginObjects = await cursor.toArray();
+        return allLoginObjects;
     } catch (err) {
         console.error(`Something went wrong trying to get the documents: ${err}\n`);
-    } finally {
-        await client.close();
+        console.dir(err);
+        return [];
     }
-    return result;
 }
 
 export async function updateLoginObject(loginObject: LoginObject) { }
