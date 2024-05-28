@@ -7,3 +7,9 @@ export interface LoginObject {
     createdDate: string;
     lastUpdated: string;
 };
+
+export interface LoginDocument extends LoginObject {
+    _id: string;
+    passwordIv: string;
+    noteIv: string;
+}

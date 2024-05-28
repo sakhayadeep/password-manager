@@ -1,28 +1,46 @@
 "use client";
 import { useState } from "react";
-import { LoginObject } from "@/util/mongodb/loginObject.type";
+import { LoginDocument } from "@/util/mongodb/loginObject.type";
 import Link from "next/link";
-import { EyeIcon, EyeSlashIcon, ArrowLeft } from "./ui-elements/icons";
+import { EyeIcon, EyeSlashIcon, ArrowLeft, Trash } from "./ui-elements/icons";
+import { deleteItemHandler } from "@/util/login-item/loginItemUtil";
 
-export default function ItemView({
-	loginObject,
-}: Readonly<{ loginObject: LoginObject }>) {
+interface ItemViewProps {
+	loginObject: LoginDocument;
+}
+
+export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 	const [showPassword, setShowPassword] = useState(false);
+
+	const deleteItemHandlerWrapper = async () => {
+		const result = await deleteItemHandler(loginObject?._id);
+		if (!result?.success) {
+			console.log("delete failed");
+		}
+	};
+
 	return (
 		<div className="relative overflow-x-auto">
 			<table className="relative w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 h-12">
-					<Link href="/dashboard" className="absolute inset-y-0 left-0">
-						<button
-							type="button"
-							className="ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
-						>
-							<ArrowLeft />
-						</button>
-					</Link>
 					<tr>
 						<th scope="col" colSpan={2} className="px-6 py-3 text-center">
+							<Link href="/dashboard" className="absolute inset-y-0 left-0">
+								<button
+									type="button"
+									className="ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+								>
+									<ArrowLeft />
+								</button>
+							</Link>
 							{loginObject?.website}
+							<button
+								onClick={deleteItemHandlerWrapper}
+								type="button"
+								className="absolute top-0 right-0 ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+							>
+								<Trash />
+							</button>
 						</th>
 					</tr>
 				</thead>

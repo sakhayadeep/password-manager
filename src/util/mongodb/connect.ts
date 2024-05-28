@@ -1,7 +1,7 @@
 'use server';
 
 import { LoginItemsInterface } from '@/app/dashboard/dashboard.type';
-import { LoginObject } from './loginObject.type';
+import { LoginObject, LoginDocument } from './loginObject.type';
 const { MongoClient, ServerApiVersion } = require('mongodb');
 import { getEncryptedData, getDecryptedData, getHashedData } from './encryption';
 
@@ -11,22 +11,27 @@ const collectionName = process.env.MONGO_COLLECTION;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
-let client: typeof MongoClient;
-let clientPromise: Promise<typeof MongoClient>;
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
 
-if (!client) {
-    client = new MongoClient(uri, {
-        serverApi: {
-            version: ServerApiVersion.v1,
-            strict: true,
-            deprecationErrors: true,
-        }
-    });
-    clientPromise = client.connect();
+let clientPromise: typeof MongoClient;
+
+async function connectMongoClient() {
+    if (!clientPromise) {
+        clientPromise = await client.connect();
+        console.log('connected to database.');
+        return clientPromise;
+    }
 }
 
 export async function createLoginObject(loginObject: LoginObject) {
     try {
+        await connectMongoClient();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
 
@@ -52,8 +57,9 @@ export async function createLoginObject(loginObject: LoginObject) {
     }
 }
 
-export async function getLoginObject(loginObjectId: string): Promise<LoginObject | null> {
+export async function getLoginObject(loginObjectId: string): Promise<LoginDocument | null> {
     try {
+        await connectMongoClient();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
         const documentId = getHashedData(loginObjectId);
@@ -84,6 +90,7 @@ export async function getLoginObject(loginObjectId: string): Promise<LoginObject
 
 export async function getAllLoginObjects(appUserEmail: string): Promise<LoginItemsInterface[]> {
     try {
+        await connectMongoClient();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
         const query = { appUserEmail };
@@ -105,4 +112,22 @@ export async function getAllLoginObjects(appUserEmail: string): Promise<LoginIte
 
 export async function updateLoginObject(loginObject: LoginObject) { }
 
-export async function deleteLoginObject(loginObject: LoginObject) { }
+export async function deleteLoginObject(loginObjectId: string) {
+    try {
+        await connectMongoClient();
+        const database = client.db(dbName);
+        const collection = database.collection(collectionName);
+
+        const query = { _id: loginObjectId };
+        const result = await collection.findOneAndDelete(query);
+        if (result !== null) {
+            return { success: true, message: "Successfully deleted one document." };
+        } else {
+            return { success: false, message: "No documents matched the query. Deleted 0 documents." };
+        }
+    } catch (err) {
+        const errorMessage = `Something went wrong trying to delete the document: ${err}\n`;
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
+    }
+}
