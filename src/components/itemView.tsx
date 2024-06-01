@@ -47,9 +47,9 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 
 	// Effect to check if form values are changed
 	useEffect(() => {
-		const valuesChanged = Object.keys(initialFormValues).some(
-			(key) => formValues[key] !== initialFormValues[key]
-		);
+		const valuesChanged = (
+			Object.keys(initialFormValues) as Array<keyof LoginDocument>
+		).some((key) => formValues[key] !== initialFormValues[key]);
 		setIsSaveButtonDisabled(!valuesChanged);
 	}, [formValues, initialFormValues]);
 
