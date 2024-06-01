@@ -1,10 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { handleFormSubmit } from "@/util/createItem/createItemUtil";
 import { Loading } from "@/components/ui-elements/icons";
 import { useFormStatus } from "react-dom";
+import { ToastMessage, ToastProps } from "@/components/ui-elements/toast";
+
+interface ToastMessageDetails extends ToastProps {
+	show: boolean;
+}
 
 export default function CreateItem() {
 	const websiteRef = useRef<HTMLInputElement>(null);
@@ -12,6 +17,18 @@ export default function CreateItem() {
 	const passwordRef = useRef<HTMLInputElement>(null);
 	const noteRef = useRef<HTMLTextAreaElement>(null);
 	const { pending } = useFormStatus();
+	const [toastMessageDetails, setToastMessageDetails] =
+		useState<ToastMessageDetails>({
+			show: false,
+			type: "success",
+			message: "",
+			onClose: () => {
+				setToastMessageDetails((prev) => ({
+					...prev,
+					show: false,
+				}));
+			},
+		});
 
 	const handleFormSubmitWrapper = async () => {
 		const formData = {
@@ -22,120 +39,134 @@ export default function CreateItem() {
 		};
 		const result = await handleFormSubmit(formData);
 		if (!result?.success) {
-			console.log("submit failed");
+			setToastMessageDetails((prev) => ({
+				...prev,
+				show: true,
+				type: "error",
+				message: "Something went wrong. Failed to add item!",
+			}));
 		}
 	};
 
 	return (
-		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-				<h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight ">
-					Create New Login Item
-				</h2>
-			</div>
+		<>
+			<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+					<h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight ">
+						Create New Login Item
+					</h2>
+				</div>
 
-			<div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-				<form className="space-y-6" action={handleFormSubmitWrapper}>
-					<div>
-						<label
-							htmlFor="website"
-							className="block text-sm font-medium leading-6 "
-						>
-							Website
-						</label>
-						<div className="mt-2">
-							<input
-								ref={websiteRef}
-								id="website"
-								name="website"
-								type="text"
-								required
-								placeholder="https://"
-								className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<label
-							htmlFor="username"
-							className="block text-sm font-medium leading-6 "
-						>
-							Username
-						</label>
-						<div className="mt-2">
-							<input
-								ref={usernameRef}
-								id="username"
-								name="username"
-								type="text"
-								autoComplete="username"
-								required
-								className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<div className="flex items-center justify-between">
+				<div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+					<form className="space-y-6" action={handleFormSubmitWrapper}>
+						<div>
 							<label
-								htmlFor="password"
+								htmlFor="website"
 								className="block text-sm font-medium leading-6 "
 							>
-								Password
+								Website
 							</label>
+							<div className="mt-2">
+								<input
+									ref={websiteRef}
+									id="website"
+									name="website"
+									type="text"
+									required
+									placeholder="https://"
+									className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								/>
+							</div>
 						</div>
-						<div className="mt-2">
-							<input
-								ref={passwordRef}
-								id="password"
-								name="password"
-								type="text"
-								autoComplete="current-password"
-								required
-								className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
 
-					<div>
-						<div className="flex items-center justify-between">
+						<div>
 							<label
-								htmlFor="Note"
+								htmlFor="username"
 								className="block text-sm font-medium leading-6 "
 							>
-								Note
+								Username
 							</label>
+							<div className="mt-2">
+								<input
+									ref={usernameRef}
+									id="username"
+									name="username"
+									type="text"
+									autoComplete="username"
+									required
+									className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								/>
+							</div>
 						</div>
-						<div className="mt-2">
-							<textarea
-								ref={noteRef}
-								id="note"
-								name="note"
-								className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
 
-					<div>
-						<button
-							type="submit"
-							className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+						<div>
+							<div className="flex items-center justify-between">
+								<label
+									htmlFor="password"
+									className="block text-sm font-medium leading-6 "
+								>
+									Password
+								</label>
+							</div>
+							<div className="mt-2">
+								<input
+									ref={passwordRef}
+									id="password"
+									name="password"
+									type="text"
+									autoComplete="current-password"
+									required
+									className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								/>
+							</div>
+						</div>
+
+						<div>
+							<div className="flex items-center justify-between">
+								<label
+									htmlFor="Note"
+									className="block text-sm font-medium leading-6 "
+								>
+									Note
+								</label>
+							</div>
+							<div className="mt-2">
+								<textarea
+									ref={noteRef}
+									id="note"
+									name="note"
+									className="block w-full p-1.5 text-black rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								/>
+							</div>
+						</div>
+
+						<div>
+							<button
+								type="submit"
+								className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+							>
+								{pending ? <Loading /> : "Create"}
+							</button>
+						</div>
+					</form>
+
+					<p className="mt-10 text-center text-sm text-gray-500">
+						<Link
+							href="/dashboard"
+							className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
 						>
-							{pending ? <Loading /> : "Create"}
-						</button>
-					</div>
-				</form>
-
-				<p className="mt-10 text-center text-sm text-gray-500">
-					<Link
-						href="/dashboard"
-						className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-					>
-						Go back to Dashboard
-					</Link>
-				</p>
+							Go back to Dashboard
+						</Link>
+					</p>
+				</div>
 			</div>
-		</div>
+			{toastMessageDetails.show && (
+				<ToastMessage
+					type={toastMessageDetails.type}
+					message={toastMessageDetails.message}
+					onClose={toastMessageDetails.onClose}
+				/>
+			)}
+		</>
 	);
 }

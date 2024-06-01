@@ -9,9 +9,9 @@ export default async function Item({
 	params?: any;
 	searchParams?: any;
 }>) {
-	const user = await loginIsRequired();
-	const { website, username } = searchParams;
-	const loginObjectId = `${user.email}${website}${username}`;
+	await loginIsRequired();
+	const { q } = searchParams;
+	const loginObjectId = decodeURIComponent(q);
 	const loginObject = await getLoginObject(loginObjectId);
 
 	return <ItemView loginObject={loginObject as LoginDocument} />;

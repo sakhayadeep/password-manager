@@ -3,7 +3,8 @@
 import { LoginItemsInterface } from '@/app/dashboard/dashboard.type';
 import { LoginObject, LoginDocument } from './loginObject.type';
 const { MongoClient, ServerApiVersion } = require('mongodb');
-import { getEncryptedData, getDecryptedData, getHashedData } from './encryption';
+import { getEncryptedData, getDecryptedData } from './encryption';
+import { ObjectId, ReturnDocument } from 'mongodb';
 
 const uri = process.env.MONGO_CONNECTION_STRING;
 const dbName = process.env.MONGO_DB;
@@ -35,12 +36,9 @@ export async function createLoginObject(loginObject: LoginObject) {
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
 
-        const { appUserEmail, website, username } = loginObject;
         const { iv: passwordIv, encryptedData: password } = getEncryptedData(loginObject.password);
         const { iv: noteIv, encryptedData: note } = getEncryptedData(loginObject.note);
-        const documentId = getHashedData(`${appUserEmail}${website}${username}`);
         const loginItem = {
-            _id: documentId,
             ...loginObject,
             passwordIv,
             password,
@@ -62,9 +60,8 @@ export async function getLoginObject(loginObjectId: string): Promise<LoginDocume
         await connectMongoClient();
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
-        const documentId = getHashedData(loginObjectId);
         const loginItem = await collection.findOne(
-            { _id: documentId },
+            { _id: new ObjectId(loginObjectId) },
         );
         const password = getDecryptedData({
             data: loginItem.password,
@@ -76,6 +73,7 @@ export async function getLoginObject(loginObjectId: string): Promise<LoginDocume
         });
         const decryptedLoginItem = {
             ...loginItem,
+            _id: loginItem._id.toString(),
             password,
             note,
         };
@@ -98,19 +96,59 @@ export async function getAllLoginObjects(appUserEmail: string): Promise<LoginIte
             query,
             {
                 sort: { website: 1 },
-                projection: { _id: 0, website: 1, username: 1 },
+                projection: { website: 1, username: 1 },
             }
         );
-        const allLoginObjects = await cursor.toArray();
+        let allLoginObjects = await cursor.toArray();
+        allLoginObjects.forEach((obj: any) => {
+            obj._id = obj._id.toString();
+        });
         return allLoginObjects;
     } catch (err) {
         console.error(`Something went wrong trying to get the documents: ${err}\n`);
-        console.dir(err);
         return [];
     }
 }
 
-export async function updateLoginObject(loginObject: LoginObject) { }
+export async function updateLoginObject(loginObject: LoginDocument) {
+    try {
+        await connectMongoClient();
+        const database = client.db(dbName);
+        const collection = database.collection(collectionName);
+
+        const _id = new ObjectId(loginObject._id);
+        const query = { _id };
+        const { iv: passwordIv, encryptedData: password } = getEncryptedData(loginObject.password);
+        const { iv: noteIv, encryptedData: note } = getEncryptedData(loginObject.note);
+        const replacement = {
+            ...loginObject,
+            _id,
+            passwordIv,
+            password,
+            noteIv,
+            note,
+            lastUpdated: new Date().toISOString()
+        };
+        const result = await collection.findOneAndReplace(query, replacement, { returnDocument: ReturnDocument.AFTER });
+        if (result !== null) {
+            const updatedItem = {
+                ...result,
+                _id: result._id.toString(),
+                password: loginObject.password,
+                note: loginObject.note,
+            }
+            delete updatedItem.passwordIv;
+            delete updatedItem.noteIv;
+            return { success: true, message: "Successfully replaced one document.", updatedItem };
+        } else {
+            return { success: false, message: "No documents matched the query. Replaced 0 documents." };
+        }
+    } catch (err) {
+        const errorMessage = `Something went wrong trying to replace the document: ${err}\n`;
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
+    }
+}
 
 export async function deleteLoginObject(loginObjectId: string) {
     try {
@@ -118,7 +156,7 @@ export async function deleteLoginObject(loginObjectId: string) {
         const database = client.db(dbName);
         const collection = database.collection(collectionName);
 
-        const query = { _id: loginObjectId };
+        const query = { _id: new ObjectId(loginObjectId) };
         const result = await collection.findOneAndDelete(query);
         if (result !== null) {
             return { success: true, message: "Successfully deleted one document." };

@@ -8,13 +8,8 @@ export function LoginItems({
 	return (
 		<ul className="divide-y divide-gray-100">
 			{items.map((item) => (
-				<li
-					key={`${item.website}-${item.username}`}
-					className="flex justify-between gap-x-6 py-5"
-				>
-					<Link
-						href={`/login-item?website=${item.website}&username=${item.username}`}
-					>
+				<li key={item._id} className="flex justify-between gap-x-6 py-5">
+					<Link href={`/login-item?q=${item._id}`}>
 						<div className="flex min-w-0 gap-x-4">
 							{/* <img
 								className="h-12 w-12 flex-none rounded-full bg-gray-50"
