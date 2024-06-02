@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Password Manager",
-  description: "Store and manage your passwords",
+	title: "Pass Pro",
+	description: "Store and manage your passwords",
 };
 
 export default function RootLayout({

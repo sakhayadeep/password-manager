@@ -3,9 +3,8 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { handleFormSubmit } from "@/util/createItem/createItemUtil";
-import { Loading } from "@/components/ui-elements/icons";
-import { useFormStatus } from "react-dom";
 import { ToastMessage, ToastProps } from "@/components/ui-elements/toast";
+import SubmitButton from "@/components/create-item/submitButton";
 
 interface ToastMessageDetails extends ToastProps {
 	show: boolean;
@@ -16,7 +15,6 @@ export default function CreateItem() {
 	const usernameRef = useRef<HTMLInputElement>(null);
 	const passwordRef = useRef<HTMLInputElement>(null);
 	const noteRef = useRef<HTMLTextAreaElement>(null);
-	const { pending } = useFormStatus();
 	const [toastMessageDetails, setToastMessageDetails] =
 		useState<ToastMessageDetails>({
 			show: false,
@@ -48,6 +46,14 @@ export default function CreateItem() {
 		}
 	};
 
+	function checkURL(e: any) {
+		let string = e.target.value;
+		if (!~string.indexOf("https") && !~string.indexOf("http")) {
+			string = "https://" + string;
+			e.target.value = string;
+		}
+	}
+
 	return (
 		<>
 			<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -69,11 +75,12 @@ export default function CreateItem() {
 							<div className="mt-2">
 								<input
 									ref={websiteRef}
+									onBlur={checkURL}
 									id="website"
 									name="website"
-									type="text"
+									type="url"
 									required
-									placeholder="https://"
+									placeholder="https://example.com"
 									className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 								/>
 							</div>
@@ -141,12 +148,7 @@ export default function CreateItem() {
 						</div>
 
 						<div>
-							<button
-								type="submit"
-								className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-							>
-								{pending ? <Loading /> : "Create"}
-							</button>
+							<SubmitButton />
 						</div>
 					</form>
 

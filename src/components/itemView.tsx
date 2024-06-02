@@ -8,6 +8,7 @@ import {
 	updateItemHandler,
 } from "@/util/login-item/loginItemUtil";
 import { ToastMessage, ToastProps } from "./ui-elements/toast";
+import { Modal } from "./ui-elements/modal";
 
 interface ItemViewProps {
 	loginObject: LoginDocument;
@@ -33,6 +34,7 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 				}));
 			},
 		});
+	const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
 	// Function to handle form input changes
 	const handleInputChange = (
@@ -63,8 +65,14 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 				message: "Failed to delete item!",
 			}));
 		}
+		setOpenDeleteModal(false);
 	};
-
+	const showDeleteModal = () => {
+		setOpenDeleteModal(true);
+	};
+	const hideDeleteModal = () => {
+		setOpenDeleteModal(false);
+	};
 	const updateItemHandlerWrapper = async () => {
 		const result = await updateItemHandler(formValues);
 		if (!result?.success) {
@@ -87,139 +95,152 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 	};
 
 	return (
-		<div className="relative overflow-x-auto">
-			<table className="relative w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-				<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 h-12">
-					<tr>
-						<th scope="col" colSpan={2} className="px-6 py-3 text-center">
-							<Link
-								href="/dashboard"
-								className="absolute inset-y-0 left-0 pt-1"
+		<>
+			<div className="relative overflow-x-auto">
+				<table className="relative w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 h-12">
+						<tr>
+							<th scope="col" colSpan={2} className="px-6 py-3 text-center">
+								<Link
+									href="/dashboard"
+									className="absolute inset-y-0 left-0 pt-1"
+								>
+									<button
+										type="button"
+										className="ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+									>
+										<ArrowLeft />
+									</button>
+								</Link>
+								{loginObject?.website?.split("://")?.[1]}
+								<div className="absolute top-0 right-0">
+									<button
+										onClick={showDeleteModal}
+										type="button"
+										className="ml-1 mt-2 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+									>
+										<Trash />
+									</button>
+									<button
+										disabled={isSaveButtonDisabled}
+										onClick={updateItemHandlerWrapper}
+										type="button"
+										className={`${
+											isSaveButtonDisabled ? "cursor-not-allowed" : ""
+										} relative -top-2 ml-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800`}
+									>
+										SAVE
+									</button>
+								</div>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 							>
-								<button
-									type="button"
-									className="ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
-								>
-									<ArrowLeft />
-								</button>
-							</Link>
-							{loginObject?.website}
-							<div className="absolute top-0 right-0">
-								<button
-									onClick={deleteItemHandlerWrapper}
-									type="button"
-									className="ml-1 mt-2 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
-								>
-									<Trash />
-								</button>
-								<button
-									disabled={isSaveButtonDisabled}
-									onClick={updateItemHandlerWrapper}
-									type="button"
-									className={`${
-										isSaveButtonDisabled ? "cursor-not-allowed" : ""
-									} relative -top-2 ml-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800`}
-								>
-									SAVE
-								</button>
-							</div>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-						<th
-							scope="row"
-							className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-						>
-							Username
-						</th>
-						<td className="px-6 py-4">
-							<input
-								type="text"
-								className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-								name="username"
-								value={formValues?.username}
-								onChange={handleInputChange}
-							/>
-						</td>
-					</tr>
-					<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-						<th
-							scope="row"
-							className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-						>
-							Password
-						</th>
-						<td className="px-6 py-4">
-							<div className="relative flex w-full rounded-md border-0 p-0 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+								Username
+							</th>
+							<td className="px-6 py-4">
 								<input
-									type={showPassword ? "text" : "password"}
-									name="password"
-									value={formValues?.password}
+									type="text"
+									className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+									name="username"
+									value={formValues?.username}
 									onChange={handleInputChange}
-									className="w-full border-0 p-1.5 rounded-md"
 								/>
-								<button
-									onClick={() => {
-										setShowPassword((prev) => !prev);
-									}}
-									type="button"
-									className="absolute inset-y-0 right-0 focus:outline-none font-medium rounded-lg text-sm text-center inline-flex items-center dark:text-gray-900 dark:hover:text-blue-500 dark:focus:ring-blue-800 me-2"
-								>
-									{showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-									<span className="sr-only">show/hide password button</span>
-								</button>
-							</div>
-						</td>
-					</tr>
-					<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-						<th
-							scope="row"
-							className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-						>
-							Note
-						</th>
-						<td className="px-6 py-4">
-							<textarea
-								name="note"
-								onChange={handleInputChange}
-								className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-								value={formValues?.note}
-							></textarea>
-						</td>
-					</tr>
-					<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-						<th
-							scope="row"
-							className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-						>
-							Created
-						</th>
-						<td className="px-6 py-4">
-							<p>{new Date(formValues?.createdDate).toLocaleString()}</p>
-						</td>
-					</tr>
-					<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-						<th
-							scope="row"
-							className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-						>
-							Last updated
-						</th>
-						<td className="px-6 py-4">
-							<p>{new Date(formValues?.lastUpdated).toLocaleString()}</p>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			{toastMessageDetails.show && (
-				<ToastMessage
-					type={toastMessageDetails.type}
-					message={toastMessageDetails.message}
-					onClose={toastMessageDetails.onClose}
+							</td>
+						</tr>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+							>
+								Password
+							</th>
+							<td className="px-6 py-4">
+								<div className="relative flex w-full rounded-md border-0 p-0 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+									<input
+										type={showPassword ? "text" : "password"}
+										name="password"
+										value={formValues?.password}
+										onChange={handleInputChange}
+										className="w-full border-0 p-1.5 rounded-md"
+									/>
+									<button
+										onClick={() => {
+											setShowPassword((prev) => !prev);
+										}}
+										type="button"
+										className="absolute inset-y-0 right-0 focus:outline-none font-medium rounded-lg text-sm text-center inline-flex items-center dark:text-gray-900 dark:hover:text-blue-500 dark:focus:ring-blue-800 me-2"
+									>
+										{showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+										<span className="sr-only">show/hide password button</span>
+									</button>
+								</div>
+							</td>
+						</tr>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+							>
+								Note
+							</th>
+							<td className="px-6 py-4">
+								<textarea
+									name="note"
+									onChange={handleInputChange}
+									className="block w-full rounded-md border-0 p-1.5 text-black shadow-sm ring-1 ring-inset ring-gray-300 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+									value={formValues?.note}
+								></textarea>
+							</td>
+						</tr>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+							>
+								Created
+							</th>
+							<td className="px-6 py-4">
+								<p>{new Date(formValues?.createdDate).toLocaleString()}</p>
+							</td>
+						</tr>
+						<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+							<th
+								scope="row"
+								className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+							>
+								Last updated
+							</th>
+							<td className="px-6 py-4">
+								<p>{new Date(formValues?.lastUpdated).toLocaleString()}</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				{toastMessageDetails.show && (
+					<ToastMessage
+						type={toastMessageDetails.type}
+						message={toastMessageDetails.message}
+						onClose={toastMessageDetails.onClose}
+					/>
+				)}
+			</div>
+			{openDeleteModal && (
+				<Modal
+					modalHeader="Confirm delete"
+					modelContent="Delete this password?"
+					primaryLabel="Delete"
+					secondaryLabel="Cancel"
+					primaryCallback={deleteItemHandlerWrapper}
+					secondaryCallback={hideDeleteModal}
+					onCloseCallback={hideDeleteModal}
 				/>
 			)}
-		</div>
+		</>
 	);
 }
