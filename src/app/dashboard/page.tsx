@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SignOut } from "@/components/auth/signout-button";
-import { LoginItems } from "@/components/dashboard";
+import { LoginItems } from "@/components/dashboard/loginItems";
 import { getAllLoginObjects } from "@/util/mongodb/connect";
 import { loginIsRequired } from "@/util/sessionUtil";
 import Image from "next/image";
