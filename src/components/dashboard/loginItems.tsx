@@ -21,7 +21,7 @@ export function LoginItems({
 		);
 	}
 	return (
-		<>
+		<div className="mb-2 mt-4">
 			<Search items={items} setItems={setDisplayItems} />
 			<ul className="divide-y divide-gray-100 mt-2">
 				{displayItems.map((item) => (
@@ -48,6 +48,6 @@ export function LoginItems({
 					</li>
 				))}
 			</ul>
-		</>
+		</div>
 	);
 }
