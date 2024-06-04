@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { LoginItemsInterface } from "@/app/dashboard/dashboard.type";
-import Image from "next/image";
 import Search from "@/components/dashboard/search";
 import { useState } from "react";
+import Item from "./item";
 
 export function LoginItems({
 	items,
@@ -27,23 +27,7 @@ export function LoginItems({
 				{displayItems.map((item) => (
 					<li key={item._id} className="flex justify-between gap-x-6 py-5">
 						<Link href={`/login-item?q=${item._id}`}>
-							<div className="flex min-w-0 gap-x-4 items-center">
-								<Image
-									className="rounded-full bg-gray-50"
-									src={`${item.website}/favicon.ico`}
-									alt={`${item.website} icon`}
-									width={32}
-									height={32}
-								/>
-								<div className="min-w-0 flex-auto">
-									<p className="font-semibold leading-6">
-										{item.website?.split("://")?.[1]}
-									</p>
-									<p className="mt-1 truncate text-xs leading-5">
-										{item.username}
-									</p>
-								</div>
-							</div>
+							<Item item={item} />
 						</Link>
 					</li>
 				))}

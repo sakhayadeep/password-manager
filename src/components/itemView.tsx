@@ -2,7 +2,13 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { LoginDocument } from "@/util/mongodb/loginObject.type";
 import Link from "next/link";
-import { EyeIcon, EyeSlashIcon, ArrowLeft, Trash } from "./ui-elements/icons";
+import {
+	EyeIcon,
+	EyeSlashIcon,
+	ArrowLeft,
+	Trash,
+	Save,
+} from "./ui-elements/icons";
 import {
 	deleteItemHandler,
 	updateItemHandler,
@@ -55,6 +61,14 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 		setIsSaveButtonDisabled(!valuesChanged);
 	}, [formValues, initialFormValues]);
 
+	useEffect(() => {
+		if (toastMessageDetails.show) {
+			setTimeout(() => {
+				toastMessageDetails.onClose();
+			}, 3000);
+		}
+	}, [toastMessageDetails]);
+
 	const deleteItemHandlerWrapper = async () => {
 		const result = await deleteItemHandler(initialFormValues?._id);
 		if (!result?.success) {
@@ -97,40 +111,41 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 	return (
 		<>
 			<div className="relative overflow-x-auto">
-				<table className="relative w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 h-12">
+				<table className="relative w-full h-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 h-min">
 						<tr>
-							<th scope="col" colSpan={2} className="px-6 py-3 text-center">
-								<Link
-									href="/dashboard"
-									className="absolute inset-y-0 left-0 pt-1"
-								>
-									<button
-										type="button"
-										className="ml-1 mt-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
-									>
-										<ArrowLeft />
-									</button>
-								</Link>
-								{loginObject?.website?.split("://")?.[1]}
-								<div className="absolute top-0 right-0">
-									<button
-										onClick={showDeleteModal}
-										type="button"
-										className="ml-1 mt-2 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
-									>
-										<Trash />
-									</button>
-									<button
-										disabled={isSaveButtonDisabled}
-										onClick={updateItemHandlerWrapper}
-										type="button"
-										className={`${
-											isSaveButtonDisabled ? "cursor-not-allowed" : ""
-										} relative -top-2 ml-1 text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800`}
-									>
-										SAVE
-									</button>
+							<th scope="col" colSpan={2}>
+								<div className="flex px-2 py-1 content-center items-center">
+									<Link href="/dashboard" className="flex-none">
+										<button
+											type="button"
+											className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+										>
+											<ArrowLeft />
+										</button>
+									</Link>
+									<p className="grow text-center">
+										{loginObject?.website?.split("://")?.[1]}
+									</p>
+									<div className="flex flex-none">
+										<button
+											onClick={showDeleteModal}
+											type="button"
+											className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+										>
+											<Trash />
+										</button>
+										<button
+											disabled={isSaveButtonDisabled}
+											onClick={updateItemHandlerWrapper}
+											type="button"
+											className={`${
+												isSaveButtonDisabled ? "cursor-not-allowed" : ""
+											} text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800`}
+										>
+											<Save />
+										</button>
+									</div>
 								</div>
 							</th>
 						</tr>
