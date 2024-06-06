@@ -2,12 +2,13 @@ import Link from "next/link";
 import { SignOut } from "@/components/auth/signout-button";
 import { LoginItems } from "@/components/dashboard/loginItems";
 import { getAllLoginObjects } from "@/util/mongodb/connect";
-import { loginIsRequired } from "@/util/sessionUtil";
+import { isMasterPasswordVerified, loginIsRequired } from "@/util/sessionUtil";
 import Image from "next/image";
 import { Add } from "@/components/ui-elements/icons";
 
 export default async function Home() {
 	const user = await loginIsRequired();
+	isMasterPasswordVerified();
 	const items = await getAllLoginObjects(user.email as string);
 	return (
 		<div className="w-full flex justify-center my-2">

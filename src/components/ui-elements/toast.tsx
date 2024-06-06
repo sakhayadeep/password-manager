@@ -10,8 +10,8 @@ export interface ToastProps extends CommonToastProps {
 }
 
 const commonToastStyle: CSSProperties = {
-	position: "absolute",
-	bottom: 0,
+	position: "fixed",
+	top: "70%",
 	left: "50%",
 	transform: "translateX(-50%)",
 };

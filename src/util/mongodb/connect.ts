@@ -3,12 +3,13 @@
 import { LoginItemsInterface } from '@/app/dashboard/dashboard.type';
 import { LoginObject, LoginDocument } from './loginObject.type';
 const { MongoClient, ServerApiVersion } = require('mongodb');
-import { getEncryptedData, getDecryptedData } from './encryption';
+import { getEncryptedData, getDecryptedData, getHashedData } from './encryption';
 import { ObjectId, ReturnDocument } from 'mongodb';
 
 const uri = process.env.MONGO_CONNECTION_STRING;
 const dbName = process.env.MONGO_DB;
 const collectionName = process.env.MONGO_COLLECTION;
+const masterPasswordCollectionName = process.env.MONGO_MASTER_PASSWORD_COLLECTION;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
@@ -63,6 +64,9 @@ export async function getLoginObject(loginObjectId: string): Promise<LoginDocume
         const loginItem = await collection.findOne(
             { _id: new ObjectId(loginObjectId) },
         );
+        if (loginItem === null) {
+            return null;
+        }
         const password = getDecryptedData({
             data: loginItem.password,
             iv: loginItem.passwordIv
@@ -169,3 +173,41 @@ export async function deleteLoginObject(loginObjectId: string) {
         return { success: false, message: errorMessage };
     }
 }
+
+export async function getMasterPassword(appUserEmail: string): Promise<string | null> {
+    try {
+        await connectMongoClient();
+        const database = client.db(dbName);
+        const collection = database.collection(masterPasswordCollectionName);
+        const passwordDoc = await collection.findOne(
+            { appUserEmail },
+            { projection: { _id: 0, password: 1 } }
+        );
+        return passwordDoc?.password ?? null;
+    } catch (err) {
+        console.error(`Something went wrong trying to get master password: ${err}\n`);
+        return null;
+    }
+}
+
+export async function createMasterPassword({ password, appUserEmail }: { password: string; appUserEmail: string; }) {
+    try {
+        await connectMongoClient();
+        const database = client.db(dbName);
+        const collection = database.collection(masterPasswordCollectionName);
+
+        const hashedPassword = getHashedData(password);
+        const doc = {
+            appUserEmail,
+            password: hashedPassword
+        };
+
+        const result = await collection.insertOne(doc);
+        console.log(`A document was inserted with the _id: ${result.insertedId}`);
+        return { success: result?.acknowledged };
+    } catch (err) {
+        console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+        return { success: false };
+    }
+}
+

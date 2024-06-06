@@ -2,19 +2,14 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { LoginDocument } from "@/util/mongodb/loginObject.type";
 import Link from "next/link";
-import {
-	EyeIcon,
-	EyeSlashIcon,
-	ArrowLeft,
-	Trash,
-	Save,
-} from "./ui-elements/icons";
+import { EyeIcon, EyeSlashIcon, ArrowLeft, Trash } from "./ui-elements/icons";
 import {
 	deleteItemHandler,
 	updateItemHandler,
 } from "@/util/login-item/loginItemUtil";
 import { ToastMessage, ToastProps } from "./ui-elements/toast";
 import { Modal } from "./ui-elements/modal";
+import SaveButton from "./login-item/saveButton";
 
 interface ItemViewProps {
 	loginObject: LoginDocument;
@@ -127,24 +122,18 @@ export default function ItemView({ loginObject }: Readonly<ItemViewProps>) {
 									<p className="grow text-center">
 										{loginObject?.website?.split("://")?.[1]}
 									</p>
-									<div className="flex flex-none">
+									<div className="flex flex-none gap-2">
 										<button
 											onClick={showDeleteModal}
 											type="button"
-											className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center me-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+											className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
 										>
 											<Trash />
 										</button>
-										<button
-											disabled={isSaveButtonDisabled}
-											onClick={updateItemHandlerWrapper}
-											type="button"
-											className={`${
-												isSaveButtonDisabled ? "cursor-not-allowed" : ""
-											} text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-3 py-1 text-center dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800`}
-										>
-											<Save />
-										</button>
+										<SaveButton
+											isSaveButtonDisabled={isSaveButtonDisabled}
+											onClickHandler={updateItemHandlerWrapper}
+										/>
 									</div>
 								</div>
 							</th>

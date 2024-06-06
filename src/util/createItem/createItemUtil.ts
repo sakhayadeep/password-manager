@@ -20,5 +20,5 @@ export const handleFormSubmit = async function (formData: { [key: string]: any }
     if (result?.success) {
         redirect("/dashboard");
     }
-    return { success: false }
+    return result;
 };
