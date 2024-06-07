@@ -97,6 +97,8 @@ function PinInputBox({
 				onKeyUp={inputHandler}
 				onKeyDown={backSpaceHandler}
 				ref={inputRef}
+				pattern="[0-9]"
+				inputMode="numeric"
 			/>
 		</div>
 	);
